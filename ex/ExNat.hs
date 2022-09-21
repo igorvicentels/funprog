@@ -134,7 +134,9 @@ sg _    = Succ Zero
 
 -- lo b a is the floor of the logarithm base b of a
 lo :: Nat -> Nat -> Nat
-lo = undefined
+lo b a 
+    | b > a     = Zero 
+    | otherwise = Succ (lo b (a </> b))
 
 
 --
@@ -143,8 +145,10 @@ lo = undefined
 --
 
 toNat :: Integral a => a -> Nat
-toNat 0 = Zero
-toNat x = Succ (toNat (x - 1))
+toNat x
+    | x < 0     = error "cannot convert negative number to Nat"
+    | x == 0    = Zero
+    | otherwise = Succ (toNat (x -1))
 
 fromNat :: Integral a => Nat -> a
 fromNat Zero     = 0
@@ -159,8 +163,5 @@ instance Num Nat where
     (-) = (<->)
     abs n = n
     signum = sg
-    fromInteger x
-        | x < 0     = undefined
-        | x == 0    = undefined
-        | otherwise = undefined
+    fromInteger = toNat
 
