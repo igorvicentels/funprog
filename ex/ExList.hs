@@ -5,7 +5,7 @@ import Prelude
     , Num(..) , Integral(..) , Enum(..) , Ord(..) , Eq(..)
     , not , (&&) , (||)
     , (.) , ($)
-    , flip , curry , uncurry
+    , curry , uncurry
     , otherwise , error , undefined
     )
 import qualified Prelude   as P
@@ -48,7 +48,7 @@ product (x:xs) = x * product xs
 
 reverse :: [a] -> [a]
 reverse []     = []
-reverse (x:xs) = reverse xs ++ [x] 
+reverse (x:xs) = reverse xs <: x 
 
 (++) :: [a] -> [a] -> [a]
 []     ++ ys = ys
@@ -60,10 +60,14 @@ infixr 5 ++
 
 -- (snoc is cons written backwards)
 snoc :: a -> [a] -> [a]
-snoc x ys = ys ++ [x]
+snoc v []     = [v]
+snoc v (x:xs) = x : snoc v xs
 
 (<:) :: [a] -> a -> [a]
 (<:) = flip snoc
+
+flip :: (a -> b -> c) -> b -> a -> c
+flip f x y = f y x 
 
 -- different implementation of (++)
 (+++) :: [a] -> [a] -> [a]
@@ -99,7 +103,7 @@ drop :: Integral i => i -> [a] -> [a]
 drop n xs
     | n <= 0  = xs
 drop _ []     = []
-drop n (x:xs) = drop (n - 1) xs
+drop n (_:xs) = drop (n - 1) xs
 
 -- takeWhile
 takeWhile :: (a -> Bool) -> [a] -> [a]
@@ -233,27 +237,74 @@ isPrefixOf (x:xs) (y:ys)
 -- isSuffixOf
 
 -- zip
+zip :: [a] -> [b] -> [(a,b)]
+zip []     _      = []
+zip _      []     = []
+zip (x:xs) (y:ys) = (x,y) : zip xs ys 
+
 -- zipWith
+zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith _ []     _      = []
+zipWith _ _      []     = []
+zipWith f (x:xs) (y:ys) = f x y : zipWith f xs ys
 
 -- intercalate
+intercalate :: [a] -> [[a]] -> [a]
+intercalate _ []     = []
+intercalate _ [x]    = x
+intercalate s (x:xs) = x ++ s ++ (intercalate s xs)
+
 -- nub
+nub :: Eq a => [a] -> [a]
+nub []     = []
+nub (x:xs) = x : nub (filter (/= x) xs)  
 
 -- splitAt
+splitAt :: Int -> [a] -> ([a], [a])
+splitAt n xs 
+    | n <= 0 = ([], xs)
+splitAt n []     = ([], [])
+splitAt n (x:xs) = (x : ls, rs)
+    where (ls, rs) = splitAt (n - 1) xs
+
+-- TODO
 -- what is the problem with the following?:
 -- splitAt n xs  =  (take n xs, drop n xs)
 
+-- TODO: check how to do it
 -- break
+break :: (a -> Bool) -> [a] -> ([a], [a])
+break _ []     = ([], [])
+break p (x:xs) 
+    | p x       = (ls, x : rs)
+    | otherwise = (x: ls, rs)
+    where (ls, rs) = break p xs
 
 -- lines
+
 -- words
+
 -- unlines
+unlines :: [String] -> String
+unlines []     = ""
+unlines (l:ls) = l ++ "\n" ++ unlines ls
+
 -- unwords
+unwords :: [String] -> String
+unwords []     = ""
+unwords [w]    = w
+unwords (w:ws) = w ++ " " ++ unwords ws
 
 -- transpose
 
 -- checks if the letters of a phrase form a palindrome (see below for examples)
 palindrome :: String -> Bool
-palindrome = undefined
+palindrome cs = palindrome' $ (map C.toLower . filter C.isAlpha) cs
+    where palindrome' ""     = True
+          palindrome' [_]    = True
+          palindrome' (c:cs) = if c == L.last cs
+                               then palindrome (init cs)
+                               else False
 
 {-
 
