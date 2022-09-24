@@ -138,8 +138,10 @@ inits xs = reverse (inits' xs)
         inits' xs = xs : inits' (init xs)
 
 -- subsequences TODO
--- subsequences :: [a] -> [[a]]
--- subsequences [] = []
+subsequences :: [a] -> [[a]]
+subsequences []     = []
+subsequences [x]    = [[],[x]]
+subsequences (x:xs) = subsequences xs ++ map (x:) (subsequences xs)
 
 -- any
 any :: (a -> Bool) -> [a] -> Bool
@@ -204,7 +206,6 @@ map f (x:xs) = f x : map f xs
 
 
 -- cycle 
--- TODO: check if i should make the  pattern matching explicit
 cycle :: [a] -> [a]
 cycle [] = error "empty list"
 cycle xs = xs ++ cycle xs 
@@ -228,13 +229,16 @@ isPrefixOf (x:xs) (y:ys)
     | otherwise = False
 
 -- isInfixOf
--- isInfixOf []     _      = True
--- isInfixOf (x:xs) []     = False
--- isInfixOf (x:xs) (y:ys) 
---     | x == y    = isInfixOf xs ys
---     | otherwise 
+isInfixOf :: Eq a => [a] -> [a] -> Bool
+isInfixOf [] []     = True
+isInfixOf xs []     = False
+isInfixOf xs (y:ys)
+    | xs == take (length xs) (y:ys) = True
+    | otherwise                     = isInfixOf xs ys 
 
 -- isSuffixOf
+isSuffixOf :: Eq a => [a] -> [a] -> Bool
+isSuffixOf xs ys = xs == (drop (length ys - length xs) ys)
 
 -- zip
 zip :: [a] -> [b] -> [(a,b)]
