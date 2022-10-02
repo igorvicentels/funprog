@@ -29,3 +29,30 @@ transmit = decode . channel . encode
 
 channel :: [Bit] -> [Bit]
 channel = id
+
+
+-- Exercise 7
+parity :: [Bit] -> [Bit]
+parity xs = if even (sum xs) then xs ++ [0] else xs ++ [1]
+
+unparity :: [Bit] -> [Bit]
+unparity xs = if even (sum xs) then init xs else error "parity error"
+
+encode' :: String -> [Bit]
+encode' = concat . map (parity . make8 . int2bin . ord)
+
+decode' :: [Bit] -> String
+decode' = map (chr . bin2int . unparity) . chop9
+
+chop9 :: [Bit] -> [[Bit]]
+chop9 [] = []
+chop9 bits = take 9 bits : chop9 (drop 9 bits)
+
+
+-- Exercise 8.
+
+faultychannel :: [Bit] -> [Bit]
+faultychannel = tail
+
+transmit' :: String -> String
+transmit' = decode' . unparity . faultychannel . parity . encode'
