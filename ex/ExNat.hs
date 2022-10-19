@@ -6,6 +6,7 @@ import Prelude
     , Eq(..)
     , Ord(..)
     , Num(..)
+    , Enum(..)
     , Integral
     , Bool(..)
     , not
@@ -164,4 +165,15 @@ instance Num Nat where
     abs n = n
     signum = sg
     fromInteger = toNat
+
+
+instance Enum Nat where
+    -- toEnum = fromNat
+    -- fromEnum = toNat
+
+    enumFrom n = n : enumFrom (Succ n)
+    enumFromThen n m = n : enumFromThen (n + m) m
+    enumFromTo n m = if n <= m then n : enumFromTo (Succ n) m else []
+    enumFromThenTo n m o = if n <= o then n : enumFromThenTo (n + m) m o else [] 
+
 
