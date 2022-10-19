@@ -136,6 +136,8 @@ inits xs = reverse (inits' xs)
     where
         inits' [] = [[]]
         inits' xs = xs : inits' (init xs)
+-- inits [] = [[]]
+-- inits (x:xs) = [] : map (x:) (inits xs)
 
 -- subsequences TODO
 subsequences :: [a] -> [[a]]
@@ -150,6 +152,7 @@ any p (x:xs)
     | p x       = True
     | otherwise = any p xs
 
+-- TODO: do it in 2 lines
 -- all
 all :: (a -> Bool) -> [a] -> Bool
 all _ []     = True
@@ -184,10 +187,9 @@ elem' e (x:xs)
     | e == x    = True
     | otherwise = elem' e xs
 
--- (!!) TODO check better way to erite this
 (!!) :: [a] -> Int -> a
 _      !! n 
-    | n < 0 = error "negative index"
+            | n < 0 = error "negative index"
 []     !! _ = error "index too large"
 (x:_)  !! 0 = x 
 (_:xs) !! n = xs !! (n - 1)
@@ -275,18 +277,29 @@ splitAt n (x:xs) = (x : ls, rs)
 -- what is the problem with the following?:
 -- splitAt n xs  =  (take n xs, drop n xs)
 
--- TODO: check how to do it
 -- break
 break :: (a -> Bool) -> [a] -> ([a], [a])
 break _ []     = ([], [])
 break p (x:xs) 
-    | p x       = (ls, x : rs)
-    | otherwise = (x: ls, rs)
+    | p x       = ([], x : xs)
+    | otherwise = (x : ls, rs)
     where (ls, rs) = break p xs
 
+split :: Eq a => a -> [a] -> [[a]]
+split s []     = [] 
+split s (x:xs) 
+    | x == s    = h : split s t
+    | otherwise = (x : h) : split s t
+    where
+        (h, t) = break (== s) xs
+
 -- lines
+lines :: [Char] -> [[Char]]
+lines = split '\n'
 
 -- words
+words :: [Char] -> [[Char]]
+words = split ' '
 
 -- unlines
 unlines :: [String] -> String
@@ -300,6 +313,9 @@ unwords [w]    = w
 unwords (w:ws) = w ++ " " ++ unwords ws
 
 -- transpose
+-- transpose :: [[a]] -> [[a]]
+-- transpose [] = []
+-- transpose xs = map head xs : transpose (map tail xs) 
 
 -- checks if the letters of a phrase form a palindrome (see below for examples)
 palindrome :: String -> Bool
