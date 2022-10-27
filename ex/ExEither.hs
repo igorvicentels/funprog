@@ -35,9 +35,10 @@ fromRight _ (Right x) = x
 
 partitionEithers :: [Either a b] -> ([a], [b])
 partitionEithers []            = ([], [])
-partitionEithers (Left x : xs) = (x : ls, rs)
-    where (ls,rs) = partitionEithers xs
-partitionEithers (Right x : xs) = (ls, x : rs)
+partitionEithers (ex : xs) = 
+    case ex of
+        Left l  -> (l : ls, rs)
+        Right r -> (ls, r : rs)
     where (ls,rs) = partitionEithers xs
 
 either :: (a -> c) -> (b -> c) -> Either a b -> c
