@@ -11,7 +11,32 @@ import Prelude hiding
     , all
     , and
     , or
+    , foldr
     )
+
+foldr :: (a -> b -> b) -> b -> [a] -> b
+foldr op b []     = b
+foldr op b (x:xs) = x `op` (foldr op b xs)
+
+sum' = foldr (+) 0
+
+product' = foldr (*) 1
+
+length' = foldr (\_ -> \y -> 1 + y) 0
+
+concat' = foldr (++) []
+
+filter' p = foldr (\x -> \y -> if p x then x : y else y) []
+
+map' f = foldr (\x -> \y -> f x : y) []
+
+any' p = foldr (\x -> \y -> p x || y) False
+
+all' p = foldr (\x -> \y -> p x && y) True
+
+and' = foldr (&&) True
+
+or' = foldr (||) False
 
 sum :: Num a => [a] -> a
 sum []     = 0
