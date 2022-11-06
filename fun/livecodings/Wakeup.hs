@@ -4,7 +4,7 @@ cp :: [[a]] -> [[a]]
 cp xs = [[x,y] | x <- head xs, y <- head (tail xs)]
 
 inserts :: a -> [a] -> [[a]]
-inserts e xs = [ insertAt e i xs | i <- [0..length xs]]
+inserts e xs = [insertAt e i xs | i <- [0..length xs]]
 
 inserts' :: a -> [a] -> [[a]]
 inserts' e []     = [[e]]
