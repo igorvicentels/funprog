@@ -2,6 +2,7 @@ module Origami where
 
 import Prelude hiding
     ( foldl , foldl1 , foldr , foldr1
+    , scanl, scanr
     , sum , product
     , length
     , concat
@@ -10,6 +11,7 @@ import Prelude hiding
     , any , all
     , and , or
     , takeWhile , dropWhile
+    , minimum, maximum
     )
 
 import qualified Prelude as P
@@ -36,9 +38,9 @@ foldr1 f (x:xs) = f x (foldr1 f xs)
 
 -- foldl1 (#) [x1, x2, x3, x4]  = (((x1 # x2) # x3) # x4)
 foldl1 :: (a -> a -> a) -> [a] -> a
-foldl1 f []  = error "empty list"
-foldl1 f [x] = x
-foldl1 f xs  = f (foldl1 f (init xs)) (last xs)
+foldl1 f []     = error "empty list"
+foldl1 f [x]    = x
+foldl1 f (x:xs) = foldl f x xs
 
 --
 -- define the following scans:
@@ -52,57 +54,57 @@ foldl1 f xs  = f (foldl1 f (init xs)) (last xs)
 --
 
 scanl :: (b -> a -> b) -> b -> [a] -> [b]
-scanl f v []     = [v]
-scanl f v (x:xs) = f x : (f x (scanl f v xs))
+scanl f v []     = undefined
 
 scanr :: (a -> b -> b) -> b -> [a] -> [b]
-scanr = undefined
+scanr f v []     = [v]
+scanr f v (x:xs) = f x (foldr f v xs) : scanr f v xs 
 
 --
 -- Define all of the following functions as folds:
 --
 
 sum :: Num a => [a] -> a
-sum = undefined
+sum = foldr (+) 0
 
 product :: Num a => [a] -> a
-product = undefined
+product = foldr (*) 1
 
 concat :: [[a]] -> [a]
-concat = undefined
+concat = foldr (++) []
 
 any :: (a -> Bool) -> [a] -> Bool
-any = undefined
+any p = foldr (\x acc -> p x || acc) False
 
 all :: (a -> Bool) -> [a] -> Bool
-all = undefined
+all p = foldr (\x acc -> p x && acc) True
 
 and :: [Bool] -> Bool
-and = undefined
+and = foldr (&&) True
 
 or :: [Bool] -> Bool
-or = undefined
+or = foldr (||) False
 
 minimum :: Ord a => [a] -> a
-minimum = undefined
+minimum = foldr1 min
 
 maximum :: Ord a => [a] -> a
-maximum = undefined
+maximum = foldr1 max
 
 length :: Integral i => [a] -> i
-length = undefined
+length = foldr (\_ acc -> 1 + acc) 0
 
 filter :: (a -> Bool) -> [a] -> [a]
-filter = undefined
+filter p = foldr (\x acc -> if p x then x : acc else acc) []
 
 map :: (a -> b) -> [a] -> [b]
-map = undefined
+map f = foldr (\x acc -> f x : acc) []
 
 reverse :: [a] -> [a]
-reverse = undefined
+reverse = foldl (flip (:)) []
 
 takeWhile :: (a -> Bool) -> [a] -> [a]
-takeWhile = undefined
+takeWhile p = foldr (\x acc -> if p x then x : acc else []) []
 
 dropWhile :: (a -> Bool) -> [a] -> [a]
 dropWhile = undefined
@@ -112,8 +114,10 @@ dropWhile = undefined
 -- semo [1..10] = (30, Just 9)
 -- semo [2,4,6] = (12, Nothing)
 semo :: Integral i => [i] -> (i, Maybe i)
-semo = undefined
-
+semo xs = ((sum . filter P.even) xs, (safeMaximum . filter P.odd) xs)
+    where safeMaximum []     = Nothing
+          safeMaximum (x:xs) = Just $ maximum (x:xs)
+ 
 -- removes adjacent duplicates
 -- e.g.:
 -- remdups [1,2,2,3,3,3,1,1] = [1,2,3,1]
