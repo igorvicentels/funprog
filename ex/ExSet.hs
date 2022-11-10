@@ -49,7 +49,7 @@ instance Show a => Show (Set a) where
 
 -- smart constructor
 set :: Eq a => [a] -> Set a
-set xs = Set (L.nub xs) 
+set = fromList 
 
 empty :: Set a -> Bool
 empty (Set []) = True
@@ -58,8 +58,10 @@ empty _        = False
 singleton :: a -> Set a
 singleton x = Set [x]
 
-fromList :: [a] -> Set a
-fromList xs = Set xs
+fromList :: Eq a => [a] -> Set a
+fromList xs = Set (aux xs) 
+    where aux []     = []
+          aux (x:xs) = x : (aux (L.filter (/= x) xs))
 
 toList :: Set a -> [a]
 toList (Set xs) = xs
