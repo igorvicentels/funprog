@@ -54,7 +54,8 @@ foldl1 f (x:xs) = foldl f x xs
 --
 
 scanl :: (b -> a -> b) -> b -> [a] -> [b]
-scanl f v []     = undefined
+scanl f v []     = [v]
+scanl f v (x:xs) = v : scanl f (f v x) xs
 
 scanr :: (a -> b -> b) -> b -> [a] -> [b]
 scanr f v []     = [v]
@@ -107,7 +108,7 @@ takeWhile :: (a -> Bool) -> [a] -> [a]
 takeWhile p = foldr (\x acc -> if p x then x : acc else []) []
 
 dropWhile :: (a -> Bool) -> [a] -> [a]
-dropWhile = undefined
+dropWhile p = undefined
 
 -- sum of evens, safeMaximum of odds
 -- e.g.:
@@ -125,9 +126,11 @@ remdups :: Eq a => [a] -> [a]
 remdups = undefined
 
 safeLast :: [a] -> Maybe a
-safeLast = undefined
+safeLast []     = Nothing
+safeLast [x]    = Just x
+safeLast (x:xs) = safeLast xs
 
 -- dec2int [1,9,9,2] = 1992
 dec2int :: Integral i => [i] -> i
-dec2int = undefined
-
+dec2int = fst . foldr f (0, 0)
+    where f x acc = (x * 10 ^ snd acc + fst acc, snd acc + 1)
