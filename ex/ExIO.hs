@@ -38,6 +38,8 @@ infixl 1 >>
 ax >> ay = do ax
               ay
 
+(<<) = flip (>>)
+
 -- pauses till the user presses any normal key
 pause :: IO ()
 pause = void $ echoless getChar
@@ -61,6 +63,9 @@ putStr :: String -> IO ()
 putStr ""     = skip
 putStr (x:xs) = do putChar x
                    putStr xs
+
+-- putStrFold :: String -> IO ()
+-- putStrFold = foldr (>>) skip
 
 -- transform f into one "just like f" except that it prints a newline
 -- after any side-effects f may had
@@ -88,20 +93,23 @@ interactPerLine :: (String -> String) -> IO ()
 interactPerLine = interact . perlineize
 
 when :: Bool -> IO () -> IO ()
-when = undefined
+when True  ax = ax 
+when False _  = skip
 
 unless :: Bool -> IO () -> IO ()
-unless = undefined
+unless = when . not
 
 guard :: Bool -> IO ()
 guard = undefined
 
 forever :: IO a -> IO b
-forever = undefined
+forever ax = do ax 
+                forever ax
 
 -- transforms the action given to an equivalent one that has no result
 void :: IO a -> IO ()
 void ax = ax >> skip
+-- void = (>> skip)
 
 
 -- Kleisli compositions
@@ -109,7 +117,8 @@ infixr 1 >=>, <=<
 
 -- diagrammatic order
 (>=>) :: (a -> IO b) -> (b -> IO c) -> (a -> IO c)
-f >=> g = undefined
+(>=>) f g x = do x' <- f x
+                 g x' 
 
 -- traditional order
 -- comparison of types:
@@ -123,7 +132,8 @@ f >=> g = undefined
 infixl 1 >>=
 
 (>>=) :: IO a -> (a -> IO b) -> IO b
-ax >>= f = undefined
+ax >>= f = do x <- ax
+              f x
 
 
 infixl 4 $>, <$
@@ -131,55 +141,81 @@ infixl 4 $>, <$
 -- make an action that has the side effects of the action on the left
 -- but with result the value on the right
 ($>) :: IO a -> b -> IO b
-ax $> y = undefined
+ax $> y = ax >> return y
 
 -- vice-versa
 (<$) :: a -> IO b -> IO a
-x <$ ioy = undefined
+(<$) = flip ($>)
 
 ap :: IO (a -> b) -> IO a -> IO b
-af `ap` ax = undefined
+af `ap` ax = do f <- af
+                iomap f ax
 
 filterIO :: (a -> IO Bool) -> [a] -> IO [a]
-filterIO = undefined
+filterIO ap []     = return []
+filterIO ap (x:xs) = do b <- ap x
+                        xs' <- filterIO ap xs
+                        return (if b then x : xs' else xs')
 
 iomap :: (a -> b) -> IO a -> IO b
-iomap = undefined
+iomap f ax = do x <- ax
+                return $ f x
 
 mapIO :: (a -> IO b) -> [a] -> IO [b]
-mapIO = undefined
+mapIO af []     = return []
+mapIO af (x:xs) = do y <- af x
+                     xs' <- mapIO af xs
+                     return $ y : xs'
 
 zipWithIO :: (a -> b -> IO c) -> [a] -> [b] -> IO [c]
-zipWithIO = undefined
+zipWithIO f []     _      = return []
+zipWithIO f _      []     = return []
+zipWithIO f (x:xs) (y:ys) = do z <- f x y
+                               tl <- zipWithIO f xs ys
+                               return $ z : tl 
 
 zipWithIO_ :: (a -> b -> IO c) -> [a] -> [b] -> IO ()
-zipWithIO_ = undefined
+zipWithIO_ f xs ys = zipWithIO f xs ys >> skip
 
 sequenceIO :: [IO a] -> IO [a]
-sequenceIO = undefined
+sequenceIO []       = return []
+sequenceIO (ax:axs) = do x <- ax
+                         tl <- sequenceIO axs
+                         return $ x : tl
 
 sequenceIO_ :: [IO a] -> IO ()
-sequenceIO_ = undefined
+sequenceIO_ = void . sequenceIO
 
 replicateIO :: Integral i => i -> IO a -> IO [a]
-replicateIO = undefined
+replicateIO 0 ax = return []
+replicateIO n ax = do x <- ax
+                      xs <- replicateIO (n - 1) ax
+                      return $ x : xs
 
-replicateIO_ :: Integral i => i -> IO a -> IO [a]
-replicateIO_ = undefined
+replicateIO_ :: Integral i => i -> IO a -> IO ()
+replicateIO_ n xs = replicateIO n xs >> skip
 
 forIO :: [a] -> (a -> IO b) -> IO [b]
-forIO = undefined
+forIO []     f = return []
+forIO (x:xs) f = do y <- f x
+                    xs' <- forIO xs f
+                    return $ y : xs'
 
 forIO_ :: [a] -> (a -> IO b) -> IO ()
-forIO_ = undefined
+forIO_ xs f = forIO xs f >> skip 
 
 joinIO :: IO (IO a) -> IO a
-joinIO = undefined
+joinIO ax = do x <- ax
+               x
 
+-- TODO: Probably wrong
 foldlIO :: (b -> a -> IO b) -> b -> [a] -> IO b
-foldlIO = undefined
+foldlIO f v []     = return v
+foldlIO f v (x:xs) = do x' <- f v x
+                        xs' <- foldlIO f x' xs
+                        return xs'
 
 foldlIO_ :: (b -> a -> IO b) -> b -> [a] -> IO ()
-foldlIO_ = undefined
+foldlIO_ f v xs = foldlIO f v xs >> skip
 
 
