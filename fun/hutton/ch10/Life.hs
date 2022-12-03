@@ -5,10 +5,10 @@ type Pos = (Int, Int)
 type Board = [Pos]
 
 width :: Int
-width = 10
+width = 15
 
 height :: Int
-height = 10
+height = 15
 
 cls :: IO ()
 cls = putStr "\ESC[2J"
