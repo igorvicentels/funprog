@@ -90,13 +90,13 @@ readLine = go ""
     where go xs = do c <- getCh
                      if c == '\n' then
                          do putChar '\n'
-                            return xs
+                            return (reverse xs)
                      else if c == '\DEL' then
                          case xs of
                             [] -> go ""
                             (y:ys) ->
-                                do putChar '\b'
-                                   go (init xs)
+                                do putStr "\b \b"
+                                   go ys
                      else
                          do putChar c
-                            go $ xs ++ [c]
+                            go $ c:xs
