@@ -1,7 +1,6 @@
 module Funktor where
 
 import Prelude hiding ( fmap , (<$) )
-import Data.Tree
 
 class Funktor f where
   fmap :: (a -> b) -> f a -> f b
@@ -34,6 +33,13 @@ instance Funktor ((->) r) where
     fmap = (.)
 
 -- what about Trees?
+data Tree a = Leaf a 
+            | Node (Tree a) a (Tree a)
+    deriving ( Show, Eq )
+
+instance Funktor Tree where
+    fmap f (Leaf x)       = Leaf $ f x
+    fmap f (Node tl x tr) = Node (fmap f tl) (f x) (fmap f tr)
 
 instance Funktor IO where
     fmap f ax =

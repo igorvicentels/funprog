@@ -30,7 +30,7 @@ getSafeInt = do l <- getLine
                 let parsed = (reads l :: [(Int, String)])
                 case parsed of
                     [(h,"")] -> return $ Just h
-                    _      -> return Nothing
+                    _        -> return Nothing
 -- sequencing: first do f ignoring its result, then do g and keep its result
 infixl 1 >>
 
@@ -162,10 +162,7 @@ iomap f ax = do x <- ax
                 return $ f x
 
 mapIO :: (a -> IO b) -> [a] -> IO [b]
-mapIO af []     = return []
-mapIO af (x:xs) = do y <- af x
-                     xs' <- mapIO af xs
-                     return $ y : xs'
+mapIO f = sequenceIO . map f
 
 zipWithIO :: (a -> b -> IO c) -> [a] -> [b] -> IO [c]
 zipWithIO f []     _      = return []
