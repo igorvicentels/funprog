@@ -40,13 +40,19 @@ putNtimes n c = do if n == 0
                             putNtimes (n - 1) c
 
 doNtimes :: Integral i => i -> IO a -> IO [a]
-doNtimes = undefined
+doNtimes 0 _  = return []
+doNtimes n ax = do x <- ax
+                   xs <- doNtimes (n-1) ax
+                   return (x:xs)                
 
 doForever :: IO a -> IO ()
-doForever = undefined
+doForever ax = do ax
+                  doForever ax
+                  
 
 when :: Bool -> IO () -> IO ()
-when = undefined
+when False _  = return ()
+when True  ax = ax
 
 -- consult read.txt to learn about read
 getInteger :: IO Integer
