@@ -5,16 +5,16 @@ getTwoChars x y =
     do putChar x
        putChar y
 
-putThreePutFL :: IO ()
-putThreePutFL = 
+getThreePutFL :: IO ()
+getThreePutFL = 
     do x <- getChar
        getChar
        z <- getChar
        putChar x
        putChar z 
 
-putThreeFL :: IO (Char, Char)
-putThreeFL = 
+getThreeFL :: IO (Char, Char)
+getThreeFL = 
     do x <- getChar
        getChar
        z <- getChar
