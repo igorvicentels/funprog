@@ -9,12 +9,16 @@ hangman = do putStr "Choose word: "
              putStrLn "Try to guess it"
              play word
 
-getSecretLine :: IO String
-getSecretLine = 
-    do hSetEcho stdin False
-       x <- getLine
-       hSetEcho stdin True
+echoless :: IO a -> IO a
+echoless ax = 
+    do oldEcho <- hGetEcho stdin
+       hSetEcho stdin False
+       x <- ax
+       hSetEcho stdin oldEcho
        return x
+
+getSecretLine :: IO String
+getSecretLine = echoless getLine
 
 prompt :: IO ()
 prompt = putStr "? "
