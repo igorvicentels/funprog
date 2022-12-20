@@ -71,7 +71,7 @@ instance Applicative ZipList where
 -- pure y                 : f a
 -- x <*> pure y           : f b
 -- g                      : a -> b
--- \g -> g y              : (a -> b) -> a -> b
+-- \g -> g y              : (a -> b) -> b
 -- pure (\g -> g y)       : f ((a -> b) -> b)
 -- pure (\g -> g y) <*> x : f b
 

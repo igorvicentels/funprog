@@ -7,12 +7,14 @@ import Prelude hiding ( sum
                       , any
                       , all
                       , reverse
+                      , (++)
                       , minimum
                       , maximum
                       , length
                       , map
                       , filter
                       , takeWhile
+                      , take
                       )
 
 badId :: [a] -> [a]
@@ -39,8 +41,13 @@ all p = foldr (\x w -> p x && w) True
 reverse :: [a] -> [a]
 reverse = foldl (flip (:)) []
 
--- (++) :: [a] -> [a] -> [a]
--- (++) xs = foldr ()
+reverse' :: [a] -> [a]
+reverse' = foldr (\x w -> w ++ [x]) []
+
+(++) :: [a] -> [a] -> [a]
+(++) xs ys = foldr f v xs
+    where v      = ys
+          f x zs = x : zs
 
 minimum :: Ord a => [a] -> a
 minimum = foldr1 min
@@ -72,4 +79,24 @@ takeWhile :: (a -> Bool) -> [a] -> [a]
 takeWhile p = foldr f v
     where v     = []
           f x w = if p x then x : w else [] 
-    
+
+
+-----------------------
+-- Banana split
+-----------------------
+
+sumLenOdds :: [Int] -> (Int, Int, [Int])
+sumLenOdds = foldr f (0,0,[])
+    where f x (s, l, o) = (s + x, l + 1, if odd x then x : o else o) 
+
+take :: Int -> [a] -> [a]
+take n xs = fst $ take' n xs
+
+take' :: Int -> [a] -> ([a], Int)
+take' n = foldl f v
+    where v = ([], n)
+          f (xs, n) x = if n == 0 then v
+                                  else (snoc x xs, n - 1) 
+
+snoc :: a -> [a] -> [a]
+snoc x xs = xs ++ [x]  
